@@ -1,9 +1,11 @@
 package temperature_clock.view;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Region;
+import temperature_clock.external.RunnableClock;
 import temperature_clock.model.TemperatureModel;
 
 public class TemperatureViewController
@@ -17,9 +19,14 @@ public class TemperatureViewController
   private TemperatureModel model;
   private Region root;
   private ViewHandler viewHandler;
+  private RunnableClock clock;
 
   public TemperatureViewController()
   {
+  }
+
+  public void showTime(String timeString){
+    Platform.runLater(() -> labelTimer.setText(timeString));
   }
 
   public void init(ViewHandler viewHandler, TemperatureModel model, Region root)
