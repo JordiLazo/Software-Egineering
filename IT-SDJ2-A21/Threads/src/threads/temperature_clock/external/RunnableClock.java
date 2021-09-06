@@ -14,13 +14,17 @@ public class RunnableClock implements Runnable{
 
     @Override
     public void run() {
-        long startTime = System.currentTimeMillis(); //fetch starting time
-        while((System.currentTimeMillis() - startTime) < 10000){
+        while (true){
             LocalTime time = LocalTime.now();
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
             String timeString = time.format(timeFormatter);
             System.out.println(timeString);
             test.showTime(timeString);
+            try{
+                Thread.sleep(1000);
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
 
         }
 
