@@ -1,11 +1,11 @@
-package temperature_clock.view;
+package threads.temperature_clock.view;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
-import temperature_clock.model.TemperatureModel;
+import threads.temperature_clock.model.TemperatureModel;
 
 public class ViewHandler extends Application
 {

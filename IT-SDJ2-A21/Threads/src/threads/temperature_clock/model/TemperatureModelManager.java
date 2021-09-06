@@ -1,4 +1,4 @@
-package temperature_clock.model;
+package threads.temperature_clock.model;
 
 public class TemperatureModelManager implements TemperatureModel
 {

@@ -1,10 +1,10 @@
-package temperature_clock;
+package threads.temperature_clock;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
-import temperature_clock.model.TemperatureModel;
-import temperature_clock.model.TemperatureModelManager;
-import temperature_clock.view.ViewHandler;
+import threads.temperature_clock.model.TemperatureModel;
+import threads.temperature_clock.model.TemperatureModelManager;
+import threads.temperature_clock.view.ViewHandler;
 
 public class MyApplication extends Application
 {

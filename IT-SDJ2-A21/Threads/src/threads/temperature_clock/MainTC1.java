@@ -1,4 +1,4 @@
-package temperature_clock;
+package threads.temperature_clock;
 
 import javafx.application.Application;
 

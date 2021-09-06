@@ -1,12 +1,12 @@
-package temperature_clock.view;
+package threads.temperature_clock.view;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Region;
-import temperature_clock.external.RunnableClock;
-import temperature_clock.model.TemperatureModel;
+import threads.temperature_clock.external.RunnableClock;
+import threads.temperature_clock.model.TemperatureModel;
 
 public class TemperatureViewController
 {
@@ -34,6 +34,10 @@ public class TemperatureViewController
     this.viewHandler = viewHandler;
     this.model = model;
     this.root = root;
+    clock = new RunnableClock(this);
+    Thread t1 = new Thread(clock);
+    t1.setDaemon(true);
+    t1.start();
   }
 
   public void reset()
