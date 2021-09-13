@@ -1,14 +1,14 @@
-package new_theme;
+package observer_pattern;
 
-import java.beans.PropertyChangeListener;
+
 import java.util.ArrayList;
-import java.util.List;
 
 public class TrafficLight {
 
     private String[] lights = {"GREEN", "YELLOW", "RED", "YELLOW"};
     private int count = 2;
     private String currentLight;
+    private ArrayList<Users> users = new ArrayList<>();
 
     public TrafficLight() {
         currentLight = lights[count];
@@ -20,7 +20,14 @@ public class TrafficLight {
             count = (++count) % 4;
             currentLight = lights[count];
             System.out.println("\nLight is " + currentLight);
-        }
 
+            for (Users users : users) {
+                users.lightChanged(currentLight);
+            }
+        }
+    }
+
+    public void addUsers(Users user){
+        users.add(user);
     }
 }
