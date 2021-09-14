@@ -6,7 +6,7 @@ public class main {
         r.setPowerState(new Power3State(r));
         System.out.println("Radiator level : " + r.getPower());
         System.out.println("Waiting...");
-        Thread.sleep(11000);
+        Thread.sleep(10000);
         //r.turnDown(r);
         System.out.println("Radiator level: " + r.getPower());
     }
