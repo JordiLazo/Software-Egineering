@@ -9,7 +9,7 @@ public class Power3State implements RadiatorState {
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
-                //e.printStackTrace();
+                e.printStackTrace();
             }
             radiator.setPowerState(new Power2State());
         });

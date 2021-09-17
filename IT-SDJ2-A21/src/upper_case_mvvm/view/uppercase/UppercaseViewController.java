@@ -4,6 +4,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import upper_case_mvvm.model.TextConverter;
 
 public class UppercaseViewController {
     @FXML
@@ -12,8 +13,8 @@ public class UppercaseViewController {
     private TextField ReplyField;
     @FXML
     private Label errorLabel;
-
-    private UppercaseViewModel viewModel = new UppercaseViewModel();
+    private TextConverter text;
+    private UppercaseViewModel viewModel = new UppercaseViewModel(text);
 
     public void init(UppercaseViewModel uppercaseViewModel){
         this.viewModel = uppercaseViewModel;
