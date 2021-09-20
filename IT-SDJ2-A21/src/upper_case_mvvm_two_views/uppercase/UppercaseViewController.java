@@ -1,16 +1,15 @@
-package upper_case_mvvm.view.uppercase;
+package upper_case_mvvm_two_views.uppercase;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import upper_case_mvvm.model.TextConverter;
 import upper_case_mvvm_two_views.core.ViewHandler;
+import upper_case_mvvm_two_views.model.TextConverter;
 
 public class UppercaseViewController {
-    @FXML
-    public Button onShow;
+
+
     @FXML
     private TextField RequestField;
     @FXML
@@ -33,4 +32,7 @@ public class UppercaseViewController {
         viewModel.convert();
     }
 
+    @FXML
+    public void onShow(ActionEvent actionEvent){
+    }
 }
