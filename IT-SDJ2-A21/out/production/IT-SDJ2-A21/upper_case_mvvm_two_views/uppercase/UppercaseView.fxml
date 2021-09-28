@@ -19,6 +19,6 @@
             <Font size="41.0" />
          </font>
       </Label>
-      <Button fx:id="onShow" layoutX="429.0" layoutY="179.0" mnemonicParsing="false" text="Show log" />
+      <Button fx:id="" layoutX="429.0" layoutY="179.0" mnemonicParsing="false" text="Show log" />
    </children>
 </AnchorPane>
