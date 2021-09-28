@@ -16,11 +16,18 @@ public class TCPServer {
         while(true){
             Socket socket = serverSocket.accept();
             BufferedReader inReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter outWriter = new PrintWriter(socket.getOutputStream());
+            PrintWriter outWriter = new PrintWriter(socket.getOutputStream(),true);
 
             String replyConnect = inReader.readLine();
             if(replyConnect.equals("connect")){
                 outWriter.println("Connection accepted");
+                outWriter.println("Username accepted");
+                outWriter.println("Password accepted");
+                System.out.println("Waiting for new users");
+            }else{
+                outWriter.println("Incorrect input...disconnecting");
+                System.out.println("A user introduces an incorrect input. Closing server...");
+                serverSocket.close();
             }
         }
     }
