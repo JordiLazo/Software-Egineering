@@ -39,7 +39,12 @@ public class RmiServer implements RemoteMessageList{
 
 
     @Override
-    public void addMessage(String message) throws RemoteException {
+    public void addMessage(String message) throws RemoteException, InterruptedException {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         listOfMessages.add(message);
     }
 
@@ -48,6 +53,10 @@ public class RmiServer implements RemoteMessageList{
         for(int i = 0; i <listOfMessages.size();i++){
             System.out.println(listOfMessages.get(i));
         }
+    }
+    public ArrayList<String> returnAllArrays()
+    {
+        return listOfMessages;
     }
 
     public static void main(String[] args) throws MalformedURLException, RemoteException {

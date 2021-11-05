@@ -21,13 +21,16 @@ public class RmiClient {
     public void sendMessage(String text){
         try {
             serverStub.addMessage(text);
+            System.out.println(serverStub.returnAllArrays());
         } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
-    public void printList() throws RemoteException {
-        serverStub.print();
-    }
+//    public void printList() throws RemoteException {
+//        serverStub.print();
+//    }
 
 
     public static void main(String[] args) throws RemoteException {
@@ -39,7 +42,7 @@ public class RmiClient {
             String newMessage = input.nextLine();
             rmiClient.sendMessage(newMessage);
             System.out.println("Message \"" +newMessage+ "\" added to the list");
-            rmiClient.printList();
+           // rmiClient.printList();
             if("end".equals(newMessage)){
                 temp = false;
             }
