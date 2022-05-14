@@ -1,0 +1,1829 @@
+/*******************************
+ * Part I - Data Modeling      *
+ *******************************/
+// Set the database to be work with "books_database".
+use books_database;
+
+/*
+ * Reference to the various $jsonSchema validation options:
+ * https://docs.mongodb.com/manual/reference/operator/query/jsonSchema/
+ */
+
+/*
+ * Create the "shipping_method" collection and add the schema with validation for it.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "shipping_method_id".
+ */
+db.createCollection("shipping_method", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "shipping_method_name", "shipping_cost"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum:1,
+                    maximum:4,
+                    description: "Global unique identifier.Must be an integer and is required."
+                },
+                shipping_method_name: {
+                    enum: ["Standard", "Quick", "Partner", "Pick-up"],
+                    bsonType: "string",
+                    description: "Description of shipping method.Must be a string, is required and is a value in ['Standard', 'Quick', 'Partner', 'Pick-up']."
+                },
+                shipping_cost: {
+                    multipleOf: 10,
+                    bsonType: "int",
+                    description: "The cost of the shipping method. Must be an integer, multiple of 10 and is required"
+                }
+            }
+        }
+    }
+});
+
+// Insert a valid shipping method object
+db.shipping_method.insertOne({
+    _id: 1,
+    shipping_method_name: "Standard",
+    shipping_cost: 40
+});
+
+/*
+ * Attempt to insert an invalid shipping method object
+ * The invalid property here is the "shipping_cost" set to 33, to be valid it should be a multiple of 10.
+ */
+db.shipping_method.insertOne({
+    _id: 2,
+    shipping_method_name: "Standard",
+    shipping_cost: 33
+});
+
+db.shipping_method.updateOne(
+    {"shipping_method_name" : "Standard"},
+    {$set: {"shipping_cost": 30 }}
+);
+
+// Insert multiple shipping methods
+db.shipping_method.insertMany([
+    {_id: 2, shipping_method_name: "Quick", shipping_cost: 60},
+    {_id: 3, shipping_method_name: "Partner", shipping_cost: 20},
+    {_id: 4, shipping_method_name: "Pick-up", shipping_cost: 10},
+]);
+
+
+// Remove the "shipping_method" collection from the database.
+db.shipping_method.drop();
+
+/*
+ * Create the "order_status" collection and add the schema with validation for it.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "status_id".
+ */
+db.createCollection("order_status", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "status"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    multipleOf: 1000,
+                    description: "Global unique identifier.Must be an integer, multiple of 1000 and is required."
+                },
+                status: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "Description of the order's status.Must be a string and is not required."
+                }
+            }
+        }
+    }
+});
+
+// Insert a valid order status object
+db.order_status.insertOne({
+    _id: 2000,
+    status: "Shipped"
+});
+
+/*
+ * Attempt to insert an invalid order status object
+ * The invalid property here is the "_id" set to 222, to be valid it should be a multiple of 1000.
+ */
+db.order_status.insertOne({
+    _id: 222,
+    status: "Shipped"
+});
+
+// Insert an order status object without the status property being provided.
+db.order_status.insertOne({
+    _id: 1000
+});
+
+// Add a status for the order status object that was inserted without a status.
+db.order_status.updateOne(
+    {_id: 1000},
+    {$set : {status : "To be Shipped"}}
+);
+
+// Insert multiple order statuses
+db.order_status.insertMany([
+    {_id: 3000, status: "In Progress"},
+    {_id: 4000, status: "Processed"},
+    {_id: 5000, status: "Delivered"}
+]);
+
+// Remove the "order_status" collection from the database.
+db.order_status.drop();
+
+/*
+ * Create the "country" collection and add the schema with validation for it.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "country_id".
+ */
+db.createCollection("country", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 110000,
+                    description: "Global unique identifier.Must be an integer, multiple of 1000, larger than 110000 and is required."
+                },
+                country_name: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The name of the country where the address is located.Must be a string and is required."
+                }
+            }
+        }
+    }
+});
+
+// Insert a valid country object
+db.country.insertOne({
+    _id: 110001,
+    country_name: "Chile"
+});
+
+/*
+ * Attempt to insert an invalid country object
+ * The invalid property here is the "country_name" set to an empty string, to be valid it should be at least one character.
+ */
+db.country.insertOne({
+    _id: 110001,
+    country_name: ""
+});
+
+/*
+ * Attempt to insert an invalid country object
+ * The invalid property here is the "country_id" set to an 999, to be valid it should be greater than 110000.
+ */
+db.country.insertOne({
+    _id: 999,
+    country_name: "Argentina"
+});
+
+// Insert several valid country objects
+db.country.insertMany([
+    {_id: 110001, country_name: "Denmark"},
+    {_id: 220001, country_name: "Germany"},
+    {_id: 330001, country_name: "Romania"},
+    {_id: 440001, country_name: "Bulgaria"},
+    {_id: 550001, country_name: "The Czech Republic"}
+]);
+
+// Remove the "country" collection from the database.
+db.country.drop();
+
+/*
+ * Create the "region_province_county" collection and add the schema with validation for it.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "region_province_county_id".
+ */
+db.createCollection("region_province_county", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "region_province_county_name"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1000,
+                    description: "Global unique identifier.Must be an integer, multiple of 1000, larger than 1000 and is required."
+                },
+                region_province_county_name: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The name of the region/province/country of an address.Must be a string and is required."
+                }
+            }
+        }
+    }
+});
+
+// Insert a valid region_province_county object
+db.region_province_county.insertOne({
+    _id: 1001,
+    region_province_county_name: "Midtjylland"
+});
+
+// Insert several valid region_province_county objects
+db.region_province_county.insertMany([
+    {_id: 1002, region_province_county_name: "Nordjylland"},
+    {_id: 1003, region_province_county_name: "Hovedstaden"},
+    {_id: 2001, region_province_county_name: "Bayern"},
+    {_id: 2002, region_province_county_name: "Hessen"},
+    {_id: 2003, region_province_county_name: "Saxony-Anhalt"},
+    {_id: 3001, region_province_county_name: "Transylvania"},
+    {_id: 3002, region_province_county_name: "Moldova"},
+    {_id: 3003, region_province_county_name: "Muntenia"}
+]);
+
+/*
+ * Attempt to insert an invalid region_province_county object
+ * The invalid property here is the "_id" set to 999, to be valid it should be greater than 999.
+ */
+db.region_province_county.insertOne({
+    _id: 999,
+    region_province_county_name: "Schleswig-Holstein"
+});
+
+// Remove the "region_province_county" collection from the database.
+db.region_province_county.drop();
+
+/*
+ * Create the "address_status" collection and add the schema with validation for it.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "address_status_id".
+ */
+db.createCollection("address_status", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "address_status"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 99000,
+                    description: "Global unique identifier.Must be an integer, larger than 99000 and is required."
+                },
+                address_status: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The status of an address.Must be a string and is required."
+                }
+            }
+        }
+    }
+});
+
+// Insert several address status objects
+db.address_status.insertMany([
+    {_id: 99001, address_status: "Default"},
+    {_id: 99002, address_status: "Primary"},
+    {_id: 99003, address_status: "Secondary"},
+    {_id: 99004, address_status: "Additional"}
+]);
+
+// Remove the "address_status" collection from the database.
+db.address_status.drop();
+
+/*
+ * Create the "address" collection and add the schema with validation for it.
+ * This approach uses the manual referencing.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "address_id".
+ */
+db.createCollection("address", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "street_name", "city", "country_id"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Global unique identifier.Must be an integer, larger than 0 and is required."
+                },
+                street_number: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "The street number of an address.Must be a string and is required."
+                },
+                street_name : {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The street name of an address.Must be a string and is required."
+                },
+                city : {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The city name of an address.Must be a string and is required."
+                },
+                country_id: {
+                    bsonType: "int",
+                    minimum: 110000,
+                    description: "Reference to a country collection object.Must be an integer, multiple of 1000, larger than 1000 and is not required."
+                },
+                region_province_county_id: {
+                    bsonType: "int",
+                    minimum: 1000,
+                    description: "Reference to a region_province_country object.Must be an integer, multiple of 1000, larger than 1000 and is not required."
+                },
+                address_status_id: {
+                    bsonType: "int",
+                    minimum: 99000,
+                    description: "Reference to an address_status object.Must be an integer, larger than 99000 and is not required."
+                },
+            }
+        }
+    }
+});
+
+// Insert one address
+db.address.insertOne({
+    _id:1,
+    street_number:1,
+    street_name: "Victory Street",
+    city: "A city",
+    country_id:110004,
+    region_province_county_id:2001
+});
+
+// Insert many addresses
+db.address.insertMany([
+    {_id:111, street_number: 25, street_name: 'Mayor Petkov', city: 'Plzen', country_id: 550001, region_province_county_id: 4001},
+    {_id:199, street_number: 300, street_name: 'bul. Nikola Vaptsarov', city: 'Plovdiv', country_id: 440001, region_province_county_id: 5001},
+    {_id:200, street_number: 133, street_name: 'Calea Calarasi', city: 'Bucharest', country_id: 330001, region_province_county_id: 3003},
+]);
+
+// Remove the "address" collection from the database.
+db.address.drop();
+
+/*
+ * Create the "customer" collection and add the schema with validation for it.
+ * This approach uses the document embedding modeling.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "customer_id".
+ */
+db.createCollection("customer", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "first_name", "email", "address_ids"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 10000,
+                    description: "Global unique identifier.Must be an integer, larger than 0 and is required."
+                },
+                first_name : {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The first name of a customer.Must be a string and is not required."
+                },
+                last_name : {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The last name of a customer.Must be a string and is not required."
+                },
+                email : {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The last name of a customer.Must be a string and is not required."
+                },
+                address_ids: {
+                    bsonType: "array",
+                    minLength: 1,
+                    maxLength: 4,
+                    description: "The list of address ids that a customer has."
+                }
+            }
+        }
+    }
+});
+
+// Insert a customer
+db.customer.insertOne({
+    _id: 10000,
+    first_name: "John",
+    last_name: "Doe",
+    email: "john@doe.com",
+    address_ids: [NumberInt(1)]
+});
+
+// Insert many customers
+db.customer.insertMany([
+    {_id: 10001, first_name: 'Ryan', last_name: 'Gosling', email: 'Ryan_Gosling@email.com', address_ids: [1, 111]},
+    {_id: 10002, first_name: 'Denzel', last_name: 'Washington', email: 'Denzel@email.com', address_ids: [199]},
+    {_id: 10003, first_name: 'Alex', last_name: 'Dark', email: 'Alex_Dark@email.com', address_ids: [1,199]},
+    {_id: 10004, first_name: 'James', last_name: 'McCarthy', email: 'McCarthy@email.com', address_ids: [199, 200]},
+    {_id: 10005, first_name: 'Jesper', last_name: 'Hatting', email: 'JH@email.com', address_ids: [111, 199]},
+]);
+
+// Remove the "customer" collection from the database.
+db.customer.drop();
+
+/*
+ * Create the "order_line" collection and add the schema with validation for it.
+ * This approach uses manual referencing.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "order_line_id".
+ */
+db.createCollection("order_line", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "price", "quantity", "book_id"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Global unique identifier.Must be an integer, larger than 0 and is required."
+                },
+               price: {
+                    bsonType: "double",
+                    minimum: 1.0,
+                    description: "The price of the order line made for a book.Must be a decimal, larger than 1.0 and is required."
+               },
+               quantity: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "The amount of the book to be added to the order.Must be an integer, larger than 0 and is required."
+               },
+               book_id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "The id of the book to be added to the order.Must be an integer, larger than 0 and is required."
+               }
+            }
+        }
+    }
+});
+
+// Insert many order lines
+db.order_line.insertMany([
+    {_id: 2, price: 200.50, quantity: 2, book_id: 1},
+    {_id: 3, price: 10.50, quantity: 2, book_id: 2},
+    {_id: 4, price: 250.50, quantity: 2, book_id: 3},
+]);
+
+// Remove the "order_line" collection from the database.
+db.order_line.drop();
+
+/*
+ * Create the "order" collection and add the schema with validation for it.
+ * This approach uses manual referencing.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "order_id".
+ */
+db.createCollection("order", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "order_line_ids", "customer_id", "address_id", "shipping_method_id"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Global unique identifier.Must be an integer, larger than 0 and is required."
+                },
+                order_line_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of order line ids that an order has."
+                },
+                customer_id: {
+                    bsonType: "int",
+                    minimum: 10000,
+                    description: "The order customer reference.Must be an integer, larger than 0 and is required."
+                },
+                address_id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "The order address reference.Must be an integer, larger than 0 and is required."
+                },
+                shipping_method_id: {
+                    bsonType: "int",
+                    minimum:1,
+                    maximum:4,
+                    description: "The order shipping method reference.Must be an integer and is required."
+                },
+                order_total: {
+                    bsonType: "double",
+                    minimum: 1.0,
+                    description: "The total price of the order.Must be a decimal, larger than 1.0 and is required."
+               },
+               quantity: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "The total quantity to the order.Must be an integer, larger than 0 and is required."
+               },
+            }
+        }
+    }
+});
+
+// Insert many orders
+db.order.insertMany([
+    {_id:1, order_line_ids:[1,2,3], customer_id: 10001, address_id: 111, shipping_method_id:1},
+    {_id:2, order_line_ids:[1,3], customer_id: 10002, address_id: 199, shipping_method_id:2},
+    {_id:3, order_line_ids:[1], customer_id: 10003, address_id: 1, shipping_method_id:3},
+    {_id:4, order_line_ids:[3], customer_id: 10004, address_id: 200, shipping_method_id:4},
+]);
+
+// Remove the "order" collection from the database.
+db.order.drop();
+
+/*
+ * Create the "order_history" collection and add the schema with validation for it.
+ * This approach uses manual referencing.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "order_history_id".
+ */
+db.createCollection("order_history", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "order_id", "status_id", "status_date"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Global unique identifier.Must be an integer, larger than 0 and is required."
+                },
+                order_id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "The order_history reference.Must be an integer, larger than 0 and is required."
+                },
+                status_id: {
+                    bsonType: "int",
+                    multipleOf: 1000,
+                    description: "The order_status reference.Must be an integer, multiple of 1000 and is required."
+                },
+                status_date: {
+                    bsonType: "date",
+                    description: "Date of the order history.Must be an integer, multiple of 1000 and is required."
+                }
+            }
+        }
+    }
+});
+
+db.order_history.insertMany([
+    {_id:1, order_id:1, status_id: 3000, status_date: new Date('2022-03-09')},
+    {_id:2, order_id:2, status_id: 4000, status_date: new Date('2022-03-09')},
+    {_id:3, order_id:3, status_id: 5000, status_date: new Date('2022-03-09')}
+]);
+
+// Remove the "order_history" collection from the database.
+db.order_history.drop();
+
+/*
+ * Create the "book" collection and add the schema with validation for it.
+ * This approach uses manual referencing.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "book_id".
+ */
+db.createCollection("book", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "language_ids", "category_ids", "publisher_ids", "author_ids", "title"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Global unique identifier.Must be an integer, larger than 0 and is required."
+                },
+               language_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of language ids referencing individual" +
+                    " language documents and representing the languages in which a book is available."
+               },
+               category_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of category ids referencing individual" +
+                    " category documents and representing the categories of a book."
+               },
+               publisher_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of publisher ids referencing individual" +
+                    " publisher documents and representing the publishers of a book."
+               },
+               author_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of author ids referencing individual" +
+                    " author documents and representing the authors of a book."
+               },
+               title : {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The last name of a customer.Must be a string and is not required."
+                },
+                weight: {
+                   bsonType: "int",
+                   description: "The weight of a book (grams).Must be an integer and is not required."
+                },
+                format : {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The format in which the book is available.Must be a string and is not required."
+                },
+                ISBN_10 : {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The ISBN-10 code of the book.Must be a string and is not required."
+                },
+                ISBN_13 : {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The ISBN-13 code of the book.Must be a string and is not required."
+                },
+                condition : {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The condition of the book.Must be a string and is not required."
+                },
+                page_count: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "The number of pages the book has.Must be an integer, larger than 0 and is required."
+                },
+                out_number: {
+                    bsonType: "int",
+                    minimum: 0,
+                    description: "The number of copies of the book which were sold.Must be an integer, at least 0 and is required."
+                },
+                reading_age: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The recommended reading age of the book."
+                },
+               dimensions: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The dimensions of the book."
+                },
+                book_series: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The series of which the book is part of."
+               },
+               publication_date: {
+                    bsonType: "date",
+                    description: "Date at which the book was published.Must be a date and is not required."
+               },
+               customer_review_mark: {
+                    bsonType: "double",
+                    description: "The average mark of the book, from customer reviews. It must be a decimal value."
+               },
+               customer_review_count: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Total number of customer reviews.Must be an integer, larger than 0 and is not required."
+               },
+               available: {
+                    bsonType: "bool",
+                    description: "Whether the book is still available or not."
+               },
+               available_amount: {
+                    bsonType: "int",
+                    description: "The available amount of book copies."
+               }
+            }
+        }
+    }
+});
+
+// Insert many books
+db.book.insertMany([
+    {
+        _id:1,
+        language_ids: [1, 2, 4],
+        category_ids: [1,2,3],
+        publisher_ids: [1, 2],
+        author_ids: [1,2,4],
+        title: 'Never',
+        weight: 1000,
+        format: 'Paperback',
+        ISBN_10: '1529076935',
+        ISBN_13: '978-1529076936',
+        condition: 'new',
+        page_count: 832,
+        out_number: 5,
+        reading_age: '18 years and up',
+        dimensions: '16.3 x 5.7 x 24.3 cm',
+        book_series: 'N/A',
+        publication_date: new Date('2021-11-09'),
+        customer_review_mark: 4.5,
+        customer_review_count: 5638,
+        available: true,
+        available_amount: 600
+    },
+    {
+        _id:2,
+        language_ids: [2, 3, 5],
+        category_ids: [1,2,3],
+        publisher_ids: [1, 3],
+        author_ids: [2,3,5],
+        title: 'Dune',
+        weight: 1000,
+        format: 'Paperback',
+        ISBN_10: '0340960191',
+        ISBN_13: '978-0340960196',
+        condition: 'new',
+        page_count: 592,
+        out_number: 4,
+        reading_age: 'Any',
+        dimensions: '13.9 x 3.9 x 19.7 cm',
+        book_series: 'N/A',
+        publication_date: new Date('2021-11-09'),
+        customer_review_mark: 4.5,
+        customer_review_count: 34469,
+        available: true,
+        available_amount: 300
+    },
+    {
+        _id:3,
+        language_ids: [2, 3, 5],
+        category_ids: [4],
+        publisher_ids: [1, 3],
+        author_ids: [3],
+        title: 'Space book',
+        weight: 1000,
+        format: 'Paperback',
+        ISBN_10: '0340960192',
+        ISBN_13: '978-0340960197',
+        condition: 'new',
+        page_count: 592,
+        out_number: 2,
+        reading_age: 'Any',
+        dimensions: '13.9 x 3.9 x 19.7 cm',
+        book_series: 'N/A',
+        publication_date: new Date('2021-11-09'),
+        customer_review_mark: 4.5,
+        customer_review_count: 34469,
+        available: true,
+        available_amount: 300
+    },
+     {
+        _id:4,
+        language_ids: [2, 3, 5],
+        category_ids: [4],
+        publisher_ids: [1, 3],
+        author_ids: [4],
+        title: 'Space Opera book 1',
+        weight: 1000,
+        format: 'Paperback',
+        ISBN_10: '0340960193',
+        ISBN_13: '978-0340960198',
+        condition: 'new',
+        page_count: 592,
+        out_number: 0,
+        reading_age: 'Any',
+        dimensions: '13.9 x 3.9 x 19.7 cm',
+        book_series: 'N/A',
+        publication_date: new Date('2021-11-09'),
+        customer_review_mark: 4.5,
+        customer_review_count: 34469,
+        available: true,
+        available_amount: 300
+    },
+    {
+        _id:5,
+        language_ids: [2, 3, 5],
+        category_ids: [4],
+        publisher_ids: [1, 3],
+        author_ids: [5],
+        title: 'Space Opera book 2',
+        weight: 1000,
+        format: 'Paperback',
+        ISBN_10: '0340960194',
+        ISBN_13: '978-0340960199',
+        condition: 'new',
+        page_count: 592,
+        out_number: 0,
+        reading_age: 'Any',
+        dimensions: '13.9 x 3.9 x 19.7 cm',
+        book_series: 'N/A',
+        publication_date: new Date('2021-11-09'),
+        customer_review_mark: 4.5,
+        customer_review_count: 34469,
+        available: true,
+        available_amount: 300
+    },
+]);
+
+// Remove the "book" collection from the database.
+db.book.drop();
+
+/*
+ * Create the "author" collection and add the schema with validation for it.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "author_id".
+ */
+db.createCollection("author", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "author_name"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Global unique identifier.Must be an integer, greater than 0 and is required."
+                },
+                author_name: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The name of a book author.Must be a string and is required."
+                },
+                book_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of book ids referencing individual" +
+                    " books and which the author has written."
+               },
+            }
+        }
+    }
+});
+
+// Insert many authors
+db.author.insertMany([
+    {_id:1, author_name: 'Robert Jordan', book_ids:[1]},
+    {_id:2, author_name: 'J.K. Rowling', book_ids:[1,2]},
+    {_id:3, author_name: 'Stephen Fy', book_ids:[2,3]},
+    {_id:4, author_name: 'Ali Hazelwood', book_ids:[4]},
+    {_id:5, author_name: 'Dean Koontz', book_ids:[2,5]},
+]);
+
+// Remove the "author" collection from the database.
+db.author.drop();
+
+/*
+ * Create the "book_language" collection and add the schema with validation for it.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "publisher_id".
+ */
+db.createCollection("book_language", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "language_name", "language_code"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Global unique identifier.Must be an integer, greater than 0 and is required."
+                },
+                language_name: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The name of the language.Must be a string and is required."
+                },
+                language_code: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 5,
+                    description: "Code of the language.Must be a string and is required."
+                },
+                book_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of book ids referencing individual" +
+                    " books which have been written in the language."
+               },
+            }
+        }
+    }
+});
+
+
+// Insert many book_languages
+db.book_language.insertMany([
+    {_id:1, language_name: 'Italian', language_code: 'IT', book_ids:[1]},
+    {_id:2, language_name: 'English', language_code: 'EN_UK', book_ids:[1,2]},
+    {_id:3, language_name: 'French', language_code: 'FR', book_ids:[2]},
+    {_id:4, language_name: 'German', language_code: 'DE', book_ids:[1]},
+    {_id:5, language_name: 'Polish', language_code: 'PL',book_ids:[2]},
+]);
+
+// Remove the "book_language" collection from the database.
+db.book_language.drop();
+
+
+/*
+ * Create the "book_publisher" collection and add the schema with validation for it.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "publisher_id".
+ */
+db.createCollection("book_publisher", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "publisher_name"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Global unique identifier.Must be an integer, greater than 0 and is required."
+                },
+                publisher_name: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The name of the publisher.Must be a string and is required."
+                },
+                book_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of book ids referencing individual" +
+                    " books which have been published by the publisher."
+               },
+            }
+        }
+    }
+});
+
+
+// Insert many book_publisher
+db.book_publisher.insertMany([
+    {_id:1, publisher_name: 'Orbit', book_ids:[1, 2]},
+    {_id:2, publisher_name: 'Picador', book_ids:[1]},
+    {_id:3, publisher_name: 'Macmillan', book_ids:[2]},
+]);
+
+// Remove the "book_publisher" collection from the database.
+db.book_publisher.drop();
+
+
+/*
+ * Create the "book_category" collection and add the schema with validation for it.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "category_id".
+ */
+db.createCollection("book_category", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "category_name"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Global unique identifier.Must be an integer, greater than 0 and is required."
+                },
+                category_name: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 50,
+                    description: "The name of the category.Must be a string and is required."
+                },
+                book_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of book ids referencing individual" +
+                    " books that are within the category."
+               },
+               subcategory_ids: {
+                    bsonType: "array",
+                    description: "The list of subcategory ids referencing individual" +
+                    " subcategories of the category."
+               },
+               character_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of character ids referencing individual" +
+                    " characters that are specific to the category."
+               },
+               genre_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of genre ids referencing individual" +
+                    " genres that are specific to the category."
+               },
+            }
+        }
+    }
+});
+
+
+// Insert many book_category
+db.book_category.insertMany([
+    {_id:1, category_name: 'Science Fiction & Fantasy', book_ids:[1, 2], subcategory_ids:[2,3], character_ids:[1, 2], genre_ids:[1, 2] },
+    {_id:2, category_name: 'Science Fiction', book_ids:[1, 2], character_ids:[1], genre_ids:[1]},
+    {_id:3, category_name: 'Fantasy', book_ids:[1, 2],character_ids:[2], genre_ids:[2] },
+    {_id:4, category_name: 'Space Above Opera', book_ids:[3,4,5],subcategory_ids:[5], character_ids:[2], genre_ids:[3] },
+    {_id:5, category_name: 'Space Opera', book_ids:[], character_ids:[2], genre_ids:[3] }
+]);
+
+// Remove the "book_category" collection from the database.
+db.book_category.drop();
+
+
+/*
+ * Create the "genre" collection and add the schema with validation for it.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "genre_id".
+ */
+db.createCollection("genre", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "genre_name"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Global unique identifier.Must be an integer, greater than 0 and is required."
+                },
+                genre_name: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The name of the genre.Must be a string and is required."
+                },
+                category_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of category ids referencing individual" +
+                    " categories of which the genre is part of."
+               },
+            }
+        }
+    }
+});
+
+
+// Insert many genres
+db.genre.insertMany([
+    {_id:1, genre_name: 'Thriller', category_ids:[1, 2]},
+    {_id:2, genre_name: 'Romantic', category_ids:[2, 3]},
+    {_id:3, genre_name: 'Mystery', category_ids:[4, 5]},
+]);
+
+// Remove the "genre" collection from the database.
+db.genre.drop();
+
+/*
+ * Create the "character" collection and add the schema with validation for it.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "character_id".
+ */
+db.createCollection("character", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "character_name"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Global unique identifier.Must be an integer, greater than 0 and is required."
+                },
+                character_name: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 25,
+                    description: "The name of the character.Must be a string and is required."
+                },
+                category_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of category ids referencing individual" +
+                    " categories of the specified character."
+               },
+            }
+        }
+    }
+});
+
+
+// Insert many character
+db.character.insertMany([
+    {_id:1, character_name: 'AIs', category_ids:[1,2]},
+    {_id:2, character_name: 'Aliens', category_ids:[2]},
+    {_id:3, character_name: 'Clones', category_ids:[3]},
+]);
+
+// Remove the "character" collection from the database.
+db.character.drop();
+
+/*
+ * Create the "subcategory" collection and add the schema with validation for it.
+ * Note: MongoDB requires the "_id" attribute and it cannot be renamed, hence, in this
+ * collection, "_id" is equivalent to "subcategory_id".
+ */
+db.createCollection("subcategory", {
+    validator: {
+        $jsonSchema : {
+            bsonType: "object",
+            required: ["_id", "subcategory_name"],
+            uniqueItems: true,
+            properties: {
+                _id: {
+                    bsonType: "int",
+                    minimum: 1,
+                    description: "Global unique identifier.Must be an integer, greater than 0 and is required."
+                },
+                subcategory_name: {
+                    bsonType: "string",
+                    minLength: 1,
+                    maxLength: 50,
+                    description: "The name of the subcategory.Must be a string and is required."
+                },
+                category_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of category ids referencing individual" +
+                    " categories of which the subcategory is part of."
+               },
+               character_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of character ids referencing individual" +
+                    " characters that are specific to the subcategory."
+               },
+               genre_ids: {
+                    bsonType: "array",
+                    minimum: 1,
+                    description: "The list of genre ids referencing individual" +
+                    " genres that are specific to the subcategory."
+               },
+            }
+        }
+    }
+});
+
+
+// Insert many subcategories
+db.subcategory.insertMany([
+    {_id:1, subcategory_name: 'Architecture', category_ids:[], genre_ids:[1, 2], character_ids:[1,2]},
+    {_id:2, subcategory_name: 'Business of Art', category_ids:[1], genre_ids:[1, 3], character_ids:[1,3]},
+    {_id:3, subcategory_name: 'Conservation, Restoration & Care', category_ids:[1], genre_ids:[3], character_ids:[3]},
+    {_id:4, subcategory_name: 'British Royalty', category_ids:[], genre_ids:[3], character_ids:[3]},
+    {_id:5, subcategory_name: 'Business & Finance', category_ids:[4], genre_ids:[3], character_ids:[3]},
+]);
+
+// Remove the "subcategory" collection from the database.
+db.subcategory.drop();
+
+/*******************************
+ * Part II - Modifying data    *
+ *******************************/
+
+/*
+ * Use MongoDB CRUD methods to execute the following scenarios, use transactions where necessary. If nothing else
+ * is stated, assume you know the object ides of the objects involved.
+ */
+
+ /*
+  * 1. Sell a book to a customer.
+  */
+  db.order.insertOne({
+    _id: 5,
+    address_id: 111,
+    customer_id: 10001,
+    order_line_ids: [1,2,3],
+    order_total: 923,
+    quantity: 6,
+    shipping_method_id:4
+  });
+
+  db.book.updateOne(
+    {_id: {$eq: 5}},
+    {$set : {out_number : 2}}
+  );
+
+  db.order.find({
+    _id: {
+        $eq:5
+    }
+  });
+ /*
+  * 2. Change the address of a customer
+  */
+  db.customer.updateOne(
+    {_id:10000},
+    {$set: {address_ids: [199, 200]}}
+  );
+  /*
+   * 3. Add an existing author to a book
+   */
+   db.book.updateOne(
+    {_id:1},
+    {$set: {author_ids: [1,2]}}
+   );
+   /*
+    * 4. Retire the "Space Opera" category and assign all books from that category to the parent category.
+    *    Don't assume you know the id of the parent category.
+    */
+
+     /*this searches for all books with category Space Opera and changes that category to the Space Opera's parent category*/
+    db.book.updateMany(
+   { "category_ids": db.book_category.findOne(
+        {"category_name":"Space Opera"},{_id: 1}
+        )._id
+   },
+   {$set: {
+         "category_ids.$":db.book_category.findOne(
+                { "subcategory_ids":
+                    { $in:[db.book_category.findOne(
+                        {"category_name":"Space Opera"})._id]
+                     }
+                 })._id
+          }
+    });
+
+    /*this updates book_ids in book_category collection for the parent category of "Space Opera" category*/
+        db.book_category.updateMany(
+       { "subcategory_ids": db.book_category.findOne(
+            {"category_name":"Space Opera"},{_id: 1}
+            )._id
+       },
+       {$push: {"book_ids":
+             { $each:db.book_category.findOne(
+                   {"category_name":"Space Opera"}
+                   ).book_ids
+             }
+               }
+       });
+
+    /*remove books from book_ids array property for category = 'Space Opera' */
+       db.book_category.updateMany(
+       { "category_name":"Space Opera"},
+       {$set: {"book_ids": [] }}
+        );
+
+
+/*
+ * 5. Sell 3 copies of one book and 2 of another in a single order
+ */
+db.order_line.insertMany([
+      {_id: 5, book_id: 1, price: 200.5, quantity:3},
+      {_id: 6, book_id: 2, price: 10.5, quantity:2},
+]);
+// Order quantity
+db.order_line.aggregate({
+        $match: {
+            $and: [
+              { _id: { $gte: 5 } },
+              { _id: { $lte: 6 } }
+            ]
+        }
+     },
+     { $group: {_id : null, order_quantity: {$sum: "$quantity"}}},
+     { $project: { _id: 0, order_quantity: 1 } } // Only get the order total
+);
+// Order total
+db.order_line.aggregate({
+       $match: {
+          $and: [
+            { _id: { $gte: 5 } },
+            { _id: { $lte: 6 } }
+                ]
+       }
+     },
+     { $group: {_id : null, order_total: {$sum: { $multiply : ["$price", "$quantity"]}}}},
+     { $project: { _id: 0, order_total: 1 } } // Only get the order total
+);
+db.order.insertOne({
+     _id:6,
+     address_id: 111,
+     customer_id: 10005,
+     order_line_ids:[5,6],
+     shipping_method_id: 2,
+     order_total: 622.5,
+     quantity: 5
+});
+/*******************************
+ * Part III - Querying data    *
+ *******************************/
+/*
+ * Write find() or aggregate() statements to return the following data
+ */
+/*
+ * 1. All books by an author
+ */
+db.book.aggregate(
+  [
+    {$lookup:
+       {
+         from: "author",
+         foreignField: "_id",
+         localField: "author_ids",
+         as: "authors"
+       }
+    },
+    {$unwind: "$authors"},
+    {$match: {"authors.author_name": "Robert Jordan"}}, // filter for "Robert Jordan".
+    { $project: {
+        _id: 0,
+        "ISBN_13": 1,
+        "authors.author_name": 1,
+        available:1,
+        available_amount:1,
+        category_ids:1,
+        condition:1,
+        customer_review_count:1,
+        title:1
+       }
+     } // The properties assigned 1 will be shown
+ ]);
+/*
+ * 2. Total price of an order
+ */
+db.order_line.aggregate(
+   { $match: {
+        $and: [
+           { _id: { $gte: 5 } },
+           { _id: { $lte: 6 } }
+        ]
+      }
+   },
+   { $group: {_id : null, order_total: {$sum: { $multiply : ["$price", "$quantity"]}}}},
+   { $project: { _id: 0, order_total: 1 } } // Only get the order total
+);
+/*
+ * 3. Total sales (in £) to a customer
+ */
+     db.order.aggregate(
+    [
+        {$lookup:
+            {
+                from: "customer",
+                foreignField: "_id",
+                localField: "customer_id",
+                as: "customers"
+            }
+        },
+        {$unwind: "$customers"},
+        {$match: {"customers.first_name": "Ryan", "customers.last_name": "Gosling"}}, // filter for "Ryan Gosling". (customer_id: 11001)
+        { $group: {_id : null, "Total sales (£) to Ryan Gosling": {$sum: "$order_total"}}},
+        { $project: { _id: 0, "Total sales (£) to Ryan Gosling": 1 } } // Only get the total sales to Ryan
+    ]
+);
+/*
+ * 4. Books that are categorized as neither fiction or non-fiction
+ */
+ // a) Not fiction
+db.book_category.aggregate([
+    {$lookup:
+        {
+            from:"book",
+            foreignField: "category_ids",
+            localField: "_id",
+            as: "books"
+        },
+    },
+    {$unwind: "$books"},
+    {$match: {category_name: {$ne: "Science Fiction & Fantasy"}}},
+    { $project: { _id: 0, book_ids: 1, category_name: 1, "books.title": 1 } } // Only get the total sales to Ryan
+]);
+// b) Not non-fiction
+db.book_category.aggregate([
+   {$lookup:
+      {
+         from:"book",
+         foreignField: "category_ids",
+         localField: "_id",
+         as: "books"
+      },
+   },
+   {$unwind: "$books"},
+   {$match: {category_name: {$eq: "Science Fiction & Fantasy"}}},
+   { $project: { _id: 0, book_ids: 1, category_name: 1, "books.title": 1 } } // Only get the total sales to Ryan
+]);
+// c) All books
+db.book_category.aggregate([
+    {$lookup:
+            {
+                from:"book",                    // referenced (to join) collection name
+                localField: "_id",              // name of category collection property ("PK")
+                foreignField: "category_ids",   // name of book collection property ("FK" ref.)
+                as: "books"                     // alias for the book collection
+            },
+    },
+    {$unwind: "$books"},
+    { $project: { _id: 0, book_ids: 1, category_name: 1, "books.title": 1 } } // Only get the total sales to Ryan
+]);
+/*
+ * 5. Average page count by genre
+ * Ref.: 1) https://stackoverflow.com/questions/35813854/how-to-join-multiple-collections-with-lookup-in-mongodb
+ */
+db.book_category.aggregate([
+    // Join with book collection
+    {
+        $lookup:{
+            from: "book",           // referenced (to join) collection name
+            localField: "book_ids", // name of book collection property ("PK")
+            foreignField: "_id",    // name of book_category collection property ("FK" ref.)
+            as: "books"             // alias for the book collection
+        }
+    },
+    {   $unwind:"$books" },     // $unwind used for getting data in object or for one record only
+    // Join with genres collection
+    {
+        $lookup:{
+            from: "genre",              // referenced (to join) collection name
+            localField: "genre_ids",    // name of genre collection property ("PK")
+            foreignField: "_id",        // name of genre collection property ("FK" ref.)
+            as: "genres"
+        }
+    },
+    {   $unwind:"$genres" },
+    // define collection entry test/match properties.
+    {
+        $match:{
+            $and:[{"genres.genre_name" : "Thriller"}]
+        }
+    },
+    // define which properties should be shown (testing purposes)
+//    {
+//        $project:{
+//            _id : 1,
+//            "books.title" : 1,
+//            category_name : 1,
+//            "genres.genre_name" : 1,
+//            "books.page_count":1,
+//            "Average page count for Thriller books": 1
+//        }
+//    },
+    { $group:
+        {
+            _id : null,
+             thriller_books_total_pages: {
+                $avg: "$books.page_count" // the "$avg" operator is used to compute the average on a given property,
+             },                           // here, that is the number of pages for the "Thriller" genre.
+        },
+    },
+    { $project: { _id: 0, thriller_books_total_pages: 1 } } // Only show the average
+]);
+/*
+ * 6. Categories that have no sub-categories
+ */
+// a) Categories that have no sub-categories
+db.book_category.find({
+    subcategory_ids: {
+        $in: [null, ""]    // The "$nin" operator selects all documents where the
+    }                       // property value is not in the specified array or the property does not exist
+});
+/*
+ * b) Categories that have sub-categories
+ * Ref.: 1) https://docs.mongodb.com/manual/reference/operator/query/nin/
+ *       2) https://stackoverflow.com/questions/45007195/query-where-not-equal-to-null-or-empty
+ */
+db.book_category.find({
+    subcategory_ids: {
+        $nin: [null, ""]    // The "$nin" operator selects all documents where the
+    }                       // property value is not in the specified array or the property does not exist
+});
+/*
+ * 7. ISBN numbers of books with more than one author
+ * Ref.: 1) https://docs.mongodb.com/manual/tutorial/query-arrays/
+ *       2) https://stackoverflow.com/questions/7811163/query-for-documents-where-array-size-is-greater-than-1
+ */
+db.book.aggregate([
+    { $lookup:
+        {
+            from: "author",              // referenced (to join) collection name
+            localField: "author_ids",    // name of genre collection property ("PK")
+            foreignField: "_id",        // name of genre collection property ("FK" ref.)
+            as: "authors"
+        }
+    },
+    { $project:
+        {
+            _id:0,
+            ISBN_10:1,
+            ISBN_13:1,
+            tile:1,
+            number_of_authors: {
+                $size: "$author_ids"
+            },
+            "authors.author_name": 1
+        }
+     },
+     { $match: {
+            "number_of_authors": {
+              $gt: 1
+            }
+       }
+     }
+]);
+/*
+ * 8. ISBN numbers of books that sold at least X copies (you decide the value of X)
+ */
+//      db.book.updateOne(
+//          {_id:3},
+//          {$set: {available_amount: 35000}},
+//      );
+//      db.book.updateOne(
+//          {_id:3},
+//          {$set: {out_number: 34469}},
+//      );
+db.book.aggregate([
+  { $match: {
+       out_number: {$gte:2}
+    },
+  },
+  { $project: {
+      _id:0,
+      ISBN_10:1,
+      ISBN_13:1,
+      out_number:1,
+      title:1
+     }
+ }
+]);
+/*
+ * 9. Number of copies each book sold - unsold books should show 0 as sold copies.
+ */
+db.book.aggregate([
+  { $project: {
+       _id:0,
+       ISBN_10:1,
+       ISBN_13:1,
+       out_number:1,
+       title:1
+     }
+  }
+]);
+
+/*Vasek-Possible alternative to no. 9 if we want to calculate the number of sold books*/
+db.book.aggregate( [
+    //look up books and join with order_line and with order
+    {
+       $lookup:{
+           from: "order_line",           // referenced (to join) collection name
+           localField: "_id", // name of book collection property ("PK")
+           foreignField: "book_id",    // name of book_category collection property ("FK" ref.)
+           as: "orderLines"             // alias for the book collection
+       }
+    },
+    {   $unwind:{"path": "$orderLines",
+        "preserveNullAndEmptyArrays": true }},    
+    {
+        $lookup:{
+            from: "order",              // referenced (to join) collection name
+            localField: "orderLines._id",    // name of genre collection property ("PK")
+            foreignField: "order_line_ids",        // name of genre collection property ("FK" ref.)
+            as: "orders"                // alias for the genres collection
+        }
+    },
+   
+   { "$unwind": {
+        "path": "$orders",
+        "preserveNullAndEmptyArrays": true
+    } }, 
+
+     //group by quantity(sold copies)   
+    { $project: { _id:0, "title":1, "orderLines.quantity": { $ifNull: [ "$orderLines.quantity", 0 ] } } },  
+    { $group: {_id :"$title",order_quantity: {$sum: "$orderLines.quantity"}}, },  
+] )
+
+
+
+
+/*
+ * 10. Best-selling books: The top 10 selling books ordered in descending order by number of sales.
+ * Note.: Only 5 book documents are present in the collection.
+ * Ref.: https://stackoverflow.com/questions/19275033/mongo-sort-descending
+ */
+db.book.aggregate([
+  { $project: {
+      _id:0,
+      ISBN_10:1,
+      ISBN_13:1,
+      out_number:1,
+      title:1
+   }
+  },
+  { $sort: {out_number: -1}}
+]);
+/*
+ * 11. Best-selling genres: The top 3 selling genres ordered in descending order by number of sales.
+ * Ref.: https://docs.mongodb.com/manual/reference/operator/aggregation/group/#examples (group by day of the year)
+ */
+db.book_category.aggregate([
+   // Join with book collection
+   {
+       $lookup:{
+           from: "book",           // referenced (to join) collection name
+           localField: "book_ids", // name of book collection property ("PK")
+           foreignField: "_id",    // name of book_category collection property ("FK" ref.)
+           as: "books"             // alias for the book collection
+       }
+    },
+    {   $unwind:"$books" },     // $unwind used for getting data in object or for one record only
+    // Join with genres collection
+    {
+        $lookup:{
+            from: "genre",              // referenced (to join) collection name
+            localField: "genre_ids",    // name of genre collection property ("PK")
+            foreignField: "_id",        // name of genre collection property ("FK" ref.)
+            as: "genres"                // alias for the genres collection
+        }
+    },
+    { $unwind:"$genres" },
+    { $sort: {"books.out_number": -1}},
+    { $group : {
+        _id : "$genres.genre_name",
+        totalSalesAmount: {
+            $sum: "$books.out_number"
+        }
+     }
+    }
+]);
+/*
+ * 12. All science fiction books. Note: Books in science fiction subcategories like cyberpunk also count as science fiction.
+ * Don’t use your knowledge of the concrete category structure. (Hint: $graphLookup)
+ * Ref.: a) https://docs.mongodb.com/v4.4/text-search/#example
+ *       b) https://docs.mongodb.com/manual/tutorial/text-search-in-aggregation/#examples
+ */
+ // Option 1 (Ed)
+ // Drop all indexes
+ db.book_category.dropIndexes();
+ // Set a text search index for category_name
+ db.book_category.createIndex( { category_name: "text" } )
+
+ db.book_category.aggregate([
+   {
+      $graphLookup: {
+         from: "book_category",
+         startWith: "$_id",
+         connectFromField: "subcategory_ids",
+         connectToField: "subcategory_ids",
+         as: "hierarchy",
+      }
+   },
+   {$match:{hierarchy: { $exists: true, $not: {$size: 0} }}},
+   /*and add category where category name is Science Fiction*/
+   { $unionWith: { coll: "book_category", pipeline: [   {$match: { $text: { $search: "Science Fiction" } }}, ]} },
+   {$match: { subcategory_ids: { $nin: [null, ""] } } }, // Match only on categories that have subcategories (if all categories are wanted (w & w/ subcategories), remove this line.
+   //desctructure book_ids
+   { $unwind: "$book_ids" },
+   // Join with book collection
+   {
+       $lookup:{
+           from: "book",           // referenced (to join) collection name
+           localField: "book_ids", // name of book collection property ("PK")
+           foreignField: "_id",    // name of book_category collection property ("FK" ref.)
+           as: "books"             // alias for the book collection
+       }
+    },
+   // destructure books
+   { $unwind: "$books" },
+   // Join with book collection
+   {
+       $lookup:{
+           from: "subcategory",           // referenced (to join) collection name
+           localField: "subcategory_ids", // name of book collection property ("PK")
+           foreignField: "_id",    // name of book_category collection property ("FK" ref.)
+           as: "subcategories"             // alias for the book collection
+       }
+    },
+   { $project: {  _id: 0,book_id: "$book_ids", "books.title":1, category_name:1, "subcategories.subcategory_name":1 } }
+]);
+
+ // Option 2 (Vasek)
+ db.book_category.aggregate( [
+   /*find all categories where the top parent category name is Science Fiction*/
+   {
+      $graphLookup: {
+         from: "book_category",
+         startWith: "$_id",
+         connectFromField: "subcategory_ids",
+         connectToField: "subcategory_ids",
+         as: "hierarchy",
+         restrictSearchWithMatch: {"category_name":"Science Fiction"}
+      }
+   },
+   {$match:{hierarchy: { $exists: true, $not: {$size: 0} }}},
+   /*and add the parrent category (Science Fiction)*/
+   { $unionWith: { coll: "book_category", pipeline: [ { $match: { "category_name":"Science Fiction"} } ]} },
+   {$unwind: "$book_ids" },
+   /*add books in order to get book names later*/
+    {$lookup:
+      {
+         from: "book",
+         localField: "book_ids",
+         foreignField: "_id",
+         as: "bookNames"
+      } 
+    },
+    /*getting rid of not important properties and renaming important ones*/
+    { $project: { book_id: "$book_ids",  "bookName": "$bookNames.title" ,_id: 0 } },
+    /*deconstruct by book names*/
+    {$unwind: "$bookName"}, 
+])
+
+/*
+ * 13. Characters used in science fiction books. Not from (12) applies here as well.
+ */
+db.book_category.aggregate([
+    {$match: { $text: { $search: "Science Fiction" } }}, // Filter by "Science Fiction" contained in the category name
+    {
+      $graphLookup: {
+         from: "character",
+         startWith: "$_id",
+         connectFromField: "_id",
+         connectToField: "category_ids",
+         as: "hierarchy",
+      }
+   },
+   { $unwind: "$hierarchy" },
+    {   $project: {
+            character_name: "$hierarchy.character_name",
+            category_name:1,
+        }
+    }
+]);
+
+/*
+ * 14. Number of books in each category including books in subcategories.
+ */
+db.book_category.aggregate([
+   {
+     $lookup: {
+       from: "subcategory",              // referenced (to join) collection name
+       localField: "subcategory_ids",    // name of genre collection property ("PK")
+       foreignField: "_id",              // name of genre collection property ("FK" ref.)
+       as: "subcategories"               // alias for the subcategories collection
+     }
+  },
+  { $project: {
+      _id:0,
+      book_ids: 1,
+      category_name: 1,
+      book_ids:1,
+      books_in_category: {
+        $size: "$book_ids"  // sum the number of booksIds present in the category
+      },
+      "subcategories.subcategory_name": 1,
+      "subcategories.category_ids":1,
+      books_in_subcategory: {
+        $multiply : [
+            {$size: "$book_ids"},       // the number of bookIds present in the category
+            {$size: "$subcategories"}   // by the number of subcategories the category has
+        ]
+      },
+      books_total_in_category_and_subcategory: {
+        $sum: [                             // Add together
+            {$size: "$book_ids"},           // The number of books in the category
+            { $multiply : [                 // The number of books in the subcategory,
+                {$size: "$book_ids"},       // here it is believed that a book present in 1
+                {$size: "$subcategories"}   // category that has 2 subcategories
+                ]                           // will result in 1 book (the category)
+            }                               // and 2 books (the subcategory) as the subcategories
+        ]                                   // are distinct.
+      }
+    },
+  },
+]);
