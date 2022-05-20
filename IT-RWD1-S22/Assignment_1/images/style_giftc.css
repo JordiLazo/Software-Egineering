@@ -1,0 +1,227 @@
+:root{
+    --pink:#e84393;
+}
+
+*{
+    box-sizing: border-box;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    margin: 0;
+    text-decoration: none;
+
+}
+
+html{
+    font-size: 62.5% ;
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+    overflow-x: hidden;
+}
+
+/*HERE STARTS LOGO + NAVIGATION MENU*/
+header{
+    position: fixed;
+    top:0;
+    left:0;
+    right: 0;
+    background: #eee;
+    padding: 2rem 9%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1000;
+    box-shadow: 0 .5 rem 1rem rgba(0, 0, 0, 0.1);
+}
+header .logo{
+    font-size: 3rem;
+    color: #333;
+    font-weight: bolder;
+}
+header .logo span{
+    color: var(--pink);
+}
+header .navbar a{
+    font-size: 2rem;
+    padding: 0 1.5rem;
+    color: #666;
+}
+
+header .navbar a:hover{
+    color: var(--pink);
+}
+
+header .icons a{
+    font-size: 3rem;
+    color: #333;
+    margin-left: 1.5 rem;
+}
+
+header .icons a:hover{
+    color: var(--pink);
+}
+
+header #toggler{
+    display: none;
+}
+
+header .fa-bars{
+    font-size: 3rem;
+    color: #333;
+    border-radius: .5rem;
+    padding: .5rem 1.5rem;
+    cursor: pointer;
+    border: 1rem solid rgba(0, 0, 0, .3);
+    display: none;
+}
+/*HERE ENDS LOGO + NAVIGATION MENU*/
+
+
+
+/*HERE STARTS PRODUCTS PAGE CONTENT*/
+#sale_h1 {
+    margin-top: 60px;
+    padding:100px;
+    justify-content: center;
+    font-size: 50px;
+    font-family: Copperplate Gothic Light;
+    text-align: center;
+}
+
+.sale_page_div {
+    overflow: auto;
+    height: 620px;
+}
+
+
+/*THE PRODUCTS LIST*/
+
+#products {
+    background-color: #eee;
+    width:77%;
+    padding: 5%;
+    padding-top: 1%;
+    text-align: center;
+}
+
+.sale_h3 {
+    font-size: 30px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    text-align: center;
+    color: #333;
+    margin-top: 40px;
+    margin-bottom: 10px;
+}
+
+
+/*THE PRODUCTS CARDS*/
+
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
+  width: 310px;
+  height: 462px;
+  margin: 7px;
+  text-align: center;
+  display: inline-block;
+}
+
+.sale_h4 {
+    font-size: 20px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    text-align: center;
+    color: #333;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.price {
+  color: grey;
+  font-size: 25px;
+}
+
+.prod_desc {
+    margin-bottom: 10px;
+    margin-top: 3px;
+}
+
+.sale_page_btn {
+  border: none;
+  outline: 0;
+  padding: 12px;
+  color: white;
+  background-color: #FFB746;
+  text-align: center;
+  cursor: pointer;
+  width: 100%;
+  font-size: 18px;
+}
+
+#sale_page_btn:hover {
+  opacity: 0.7;
+}
+
+/*THE SIDEBAR NAV*/
+
+#sale_h2 {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    justify-content: center;
+    font-size: 30px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    text-align: center;
+    color: white;
+}
+
+#categories_menu {
+    background-color: rgba(255, 51, 153);
+    float: left;
+    width:23%;
+    padding: 10px;
+
+}
+
+#categories_menu a {
+    text-decoration: none;
+    font-size: 20px;
+    color: white;
+    display: block;
+    padding: 4%;
+    text-align: center;
+}
+
+#categories_menu a:hover {
+  color: black;
+  background-color: white;
+  opacity: 0.5;
+  width: 100%;
+  heigth: 90%;
+  border-radius: 10px;
+}
+
+/*
+@media screen and (max-width: 700px) {
+  #categories_menu {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  #categories_menu a {float: left;}
+  div.products_list {margin-left: 0;}
+}
+
+@media screen and (max-width: 400px) {
+  #categories_menu a {
+    text-align: center;
+    float: none;
+
+    */
+
+
+
+
+
+
+
+
+
+
+/*HERE ENDS PRODUCTS PAGE CONTENT*/
+
