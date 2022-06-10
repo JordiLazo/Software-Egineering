@@ -1,0 +1,44 @@
+﻿---ADMIN ACCOUNT---
+User: VIA
+Password: 123
+
+---USER ACCOUNT---
+User: pampa
+Password: pampa
+
+User: olle
+Password: 123456
+
+User: allan
+Password: 123456
+
+---AUTHORS---
+ID: a0
+Name: mario
+
+ID: a1
+Name: allan
+
+ID: a2
+Name: jk rowling
+
+ID: a4
+Name: carl sagan
+
+
+---PUBLISHER---
+ID: p1
+Name: jordi
+
+ID: p2
+Name: sauron
+
+---BOOKS---
+ID: 1234
+Name: Harry Potter
+
+ID: 1235
+Name: Harry Potter 2
+
+ID: 1236
+Name: Harry Potter 3
