@@ -1,5 +1,5 @@
 //
-WITH "https://gist.githubusercontent.com/santo0/e4ba9939e5146c5fe9c75d967f4fcb73/raw/98359e7b7f447b2615dcc6e0e8d9137221804f15/books.json" AS url
+WITH "https://raw.githubusercontent.com/JordiLazo/VIA_University_College_Software_Engineering/main/IT-NSQ1-S22/Assignment_3/books.js" AS url
 CALL apoc.load.json(url) YIELD value
 UNWIND value as book
 CREATE (b:Book{
@@ -40,7 +40,7 @@ FOREACH (author IN book.authors |
 )
 
 //
-WITH "https://gist.githubusercontent.com/santo0/3ff6124dcb2cbd1d82156555022a3fbf/raw/96cb689a9ab923e7dc0cb13386ca28fdd18e788b/categories.json" AS url
+WITH "https://raw.githubusercontent.com/JordiLazo/VIA_University_College_Software_Engineering/main/IT-NSQ1-S22/Assignment_3/category.js" AS url
 CALL apoc.load.json(url) YIELD value
 UNWIND value as category
 MERGE (c1:Category{
@@ -56,7 +56,7 @@ MERGE (c2:Category{
 MERGE (c2) -[:IS_PARENT]-> (c1)
 
 //
-WITH "https://gist.githubusercontent.com/santo0/b75c33cd922ee81477c37d6249074f51/raw/8f84fef4d695da00ac7ea98985481d6bac03cf6a/characters.json" AS url
+WITH "https://raw.githubusercontent.com/JordiLazo/VIA_University_College_Software_Engineering/main/IT-NSQ1-S22/Assignment_3/character.js" AS url
 CALL apoc.load.json(url) YIELD value
 UNWIND value as character
 MERGE (c:Character{
@@ -68,7 +68,7 @@ MERGE (ca:Category{
 MERGE (c)-[:APPEARS_IN]->(ca)
 
 //
-WITH "https://gist.githubusercontent.com/santo0/afeec3df662d3317fcc28b8a53baeaaa/raw/06e96b76cf3a70e3c6b34e0ac6742dfbf9d29c0c/genres.json" AS url
+WITH "https://raw.githubusercontent.com/JordiLazo/VIA_University_College_Software_Engineering/main/IT-NSQ1-S22/Assignment_3/genre.js" AS url
 CALL apoc.load.json(url) YIELD value
 UNWIND value as genre
 MERGE (g:Genre{
@@ -88,7 +88,7 @@ MERGE (a:Author{
 })
 
 //
-WITH "https://gist.githubusercontent.com/santo0/60eb770cda64a516bd588f5618556fa1/raw/80a09b8cbceded380d356fbb6ec0b1c0bd406024/languages.json" AS url
+WITH "https://raw.githubusercontent.com/JordiLazo/VIA_University_College_Software_Engineering/main/IT-NSQ1-S22/Assignment_3/language.js" AS url
 CALL apoc.load.json(url) YIELD value
 UNWIND value as language
 MERGE (c:Language{
@@ -96,7 +96,7 @@ MERGE (c:Language{
 })
 
 //
-WITH "https://gist.githubusercontent.com/santo0/0b5917ef542bd1bd792dfc02ee0e3020/raw/d0b2163361dee94b073c28e2075d6c2db1ffb328/customers.json" AS url
+WITH "https://raw.githubusercontent.com/JordiLazo/VIA_University_College_Software_Engineering/main/IT-NSQ1-S22/Assignment_3/customer.js" AS url
 CALL apoc.load.json(url) YIELD value
 UNWIND value AS customer
 CREATE (c:Customer{
