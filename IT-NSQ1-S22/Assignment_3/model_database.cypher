@@ -80,7 +80,7 @@ MERGE (ca:Category{
 MERGE (g)-[:IS_PART_OF]->(ca)
 
 //
-WITH "https://gist.githubusercontent.com/santo0/9836ac6497a92f1734db1f92c049ab53/raw/8e11f93bbfef0623fc5915188bcc8cd149bb8171/authors.json" AS url
+WITH "https://raw.githubusercontent.com/JordiLazo/VIA_University_College_Software_Engineering/main/IT-NSQ1-S22/Assignment_3/authors.js" AS url
 CALL apoc.load.json(url) YIELD value
 UNWIND value as author
 MERGE (a:Author{
